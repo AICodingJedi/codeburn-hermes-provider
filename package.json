@@ -1,0 +1,36 @@
+{
+  "name": "codeburn-hermes-provider",
+  "version": "0.1.0",
+  "description": "CodeBurn provider plugin for Hermes Agent — track token usage and costs in the CodeBurn TUI dashboard",
+  "main": "src/providers/hermes.ts",
+  "types": "src/providers/hermes.ts",
+  "type": "module",
+  "keywords": [
+    "codeburn",
+    "hermes-agent",
+    "token-usage",
+    "cost-tracking",
+    "ai-dashboard"
+  ],
+  "author": "AICodingJedi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AICodingJedi/codeburn-hermes-provider"
+  },
+  "peerDependencies": {
+    "better-sqlite3": ">=9.0.0"
+  },
+  "peerDependenciesMeta": {
+    "better-sqlite3": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

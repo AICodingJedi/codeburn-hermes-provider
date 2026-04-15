@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.js
+!src/**/*.js
+.d.ts
+!src/external.d.ts
