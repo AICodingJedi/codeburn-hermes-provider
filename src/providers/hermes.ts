@@ -281,6 +281,7 @@ function createParser(
           const turns: {
             assistantMsg: MessageRow
             toolNames: string[]
+            bashCommands: string[]
             timestamp: number
             userMessage: string
           }[] = []
@@ -288,6 +289,7 @@ function createParser(
           let currentUserMessage = ''
           let pendingAssistant: MessageRow | null = null
           let pendingTools: string[] = []
+          let pendingBashCommands: string[] = []
 
           for (const msg of messages) {
             if (msg.role === 'user') {
@@ -303,12 +305,14 @@ function createParser(
                 turns.push({
                   assistantMsg: pendingAssistant,
                   toolNames: [...pendingTools],
+                  bashCommands: [...pendingBashCommands],
                   timestamp: pendingAssistant.timestamp,
                   userMessage: currentUserMessage,
                 })
               }
               pendingAssistant = msg
               pendingTools = []
+              pendingBashCommands = []
 
               // Extract tool calls from this assistant message
               if (msg.tool_calls) {
@@ -319,6 +323,14 @@ function createParser(
                       const name = call?.function?.name ?? call?.name ?? ''
                       if (name) {
                         pendingTools.push(toolNameMap[name] ?? name)
+                        // Extract bash commands from terminal/execute_code calls
+                        if (name === 'terminal' || name === 'execute_code') {
+                          try {
+                            const args = JSON.parse(call?.function?.arguments ?? '{}')
+                            const cmd = args.command ?? args.code ?? ''
+                            if (cmd) pendingBashCommands.push(cmd.slice(0, 200))
+                          } catch { /* ignore */ }
+                        }
                       }
                     }
                   }
@@ -345,6 +357,7 @@ function createParser(
             turns.push({
               assistantMsg: pendingAssistant,
               toolNames: [...pendingTools],
+              bashCommands: [...pendingBashCommands],
               timestamp: pendingAssistant.timestamp,
               userMessage: currentUserMessage,
             })
@@ -424,6 +437,7 @@ function createParser(
               webSearchRequests: turn.toolNames.includes('Search') ? 1 : 0,
               costUSD,
               tools: turn.toolNames,
+              bashCommands: turn.bashCommands,
               timestamp,
               speed: 'standard',
               deduplicationKey: dedupKey,
