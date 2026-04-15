@@ -10,8 +10,3 @@ declare module 'better-sqlite3' {
   function Database(path: string, options?: { readonly?: boolean }): Database
   export default Database
 }
-
-declare module 'sql.js' {
-  const sqlJs: unknown
-  export default sqlJs
-}

@@ -95,13 +95,8 @@ async function loadSqlite(): Promise<void> {
   sqliteLoadAttempted = true
   try {
     sqliteModule = await import('better-sqlite3')
-  } catch (primaryErr) {
-    try {
-      // Try sql.js as a fallback (WASM-based, no native build)
-      sqliteModule = await import('sql.js') as unknown as typeof import('better-sqlite3')
-    } catch {
-      sqliteLoadError = `codeburn: hermes provider requires a SQLite library. Install better-sqlite3 or sql.js.\n  ${primaryErr instanceof Error ? primaryErr.message : primaryErr}`
-    }
+  } catch (err) {
+    sqliteLoadError = `codeburn: hermes provider requires better-sqlite3.\n  ${err instanceof Error ? err.message : err}`
   }
 }
 
@@ -115,7 +110,6 @@ function getSqliteLoadError(): string {
 
 function openDatabase(dbPath: string): SqliteDatabase {
   const mod = sqliteModule!
-  // better-sqlite3 returns a Database object with .prepare().all()
   if ('default' in mod && typeof mod.default === 'function') {
     const db = (mod.default as Function)(dbPath, { readonly: true })
     return {
@@ -128,8 +122,7 @@ function openDatabase(dbPath: string): SqliteDatabase {
       close() { db.close() },
     }
   }
-  // sql.js fallback (read-only)
-  throw new Error('sql.js read-only mode not yet implemented — use better-sqlite3')
+  throw new Error('better-sqlite3 not loaded correctly')
 }
 
 // ---------------------------------------------------------------------------
